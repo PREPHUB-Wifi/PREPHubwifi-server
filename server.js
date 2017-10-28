@@ -1,11 +1,25 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+const {Client} = require('pg');
+var client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'prephubwifi',
+  password: 'postgres',
+  port: 5432,
+});
 
-// Create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+client.connect((err) => {
+  if (err) {
+    console.error("Could not connect to database")
+  } else {
+    console.log("connected")
+  }
+});
 
-app.use(express.static('public'));
+app.use(bodyParser());
+
 
 app.get('/notes', function (req, res) {
   // send all of the notes
@@ -20,10 +34,25 @@ app.get('/notes', function (req, res) {
 
 app.post('/notes', function (req, res) {
   // Prepare output in JSON format
+  console.log(req.body);
   response = {
     newName:req.body.newName,
-    last_name:req.body.last_name
+    needHelp:req.body.needHelp,
+    notes:req.body.notes,
+    time:req.body.time,
   };
+
+  var query = "INSERT INTO prephubwifi.all_reports (created_at, name, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7)";
+
+  var values = [response.time, response.newName, response.notes, 0, 'confirmed', 'en', {}];
+  client.query(query, values)
+    .then(function() {
+      console.log("Done inserting");
+    })
+    .catch(function() {
+      console.log("Error inserting")
+    });
+
   console.log(response);
   res.end(JSON.stringify(response));
 })
