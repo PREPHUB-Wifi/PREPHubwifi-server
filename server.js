@@ -1,6 +1,8 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var cors = require('cors');
+
 const {Client} = require('pg');
 var client = new Client({
   user: 'postgres',
@@ -19,6 +21,7 @@ client.connect((err) => {
 });
 
 app.use(bodyParser());
+app.use(cors({origin: "*"}));
 
 
 app.get('/notes', function (req, res) {
