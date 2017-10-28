@@ -7,30 +7,31 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 app.use(express.static('public'));
 
-// app.get('/process_get', function (req, res) {
-//    // Prepare output in JSON format
-//    response = {
-//       first_name:req.query.first_name,
-//       last_name:req.query.last_name
-//    };
-//    console.log(response);
-//    res.end(JSON.stringify(response));
-// })
+app.get('/notes', function (req, res) {
+  // send all of the notes
+  response = {
+    first_name:req.query.first_name,
+    last_name:req.query.last_name
+  };
 
-app.post('/process_post', urlencodedParser, function (req, res) {
-   // Prepare output in JSON format
-   response = {
-      first_name:req.body.first_name,
-      last_name:req.body.last_name
-   };
-   console.log(response);
-   res.end(JSON.stringify(response));
+  console.log(response);
+  res.end(JSON.stringify(response));
+})
+
+app.post('/notes', function (req, res) {
+  // Prepare output in JSON format
+  response = {
+    newName:req.body.newName,
+    last_name:req.body.last_name
+  };
+  console.log(response);
+  res.end(JSON.stringify(response));
 })
 
 var server = app.listen(8081, function () {
-   var host = server.address().address
-   var port = server.address().port
-   
-   console.log("Example app listening at http://%s:%s", host, port)
+  var host = server.address().address
+  var port = server.address().port
+
+  console.log("Example app listening at http://%s:%s", host, port)
 
 })
