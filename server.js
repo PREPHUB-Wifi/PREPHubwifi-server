@@ -26,13 +26,31 @@ app.use(cors({origin: "*"}));
 
 app.get('/notes', function (req, res) {
   // send all of the notes
-  response = {
-    first_name:req.query.first_name,
-    last_name:req.query.last_name
-  };
-
-  console.log(response);
-  res.end(JSON.stringify(response));
+  console.log("GET request to /notes");
+  //let query = "SELECT (name, source, status, created_at) FROM prephubwifi.all_reports";
+  let query = `select array_to_json(array_agg(row_to_json(t)))
+      from (
+        select newName, needHelp, notes, time from prephubwifi.all_reports
+      ) t`; 
+  client.query(query)
+    .then( (result) => {
+      console.log("results: ");
+      console.log(JSON.stringify(result.rows[0].array_to_json));
+      let data = result.rows[0].array_to_json;
+      let final = [];
+      for (let row of data) { 
+        temp = {
+          newName:row.newname,
+          needHelp:row.needhelp,
+          notes:row.notes,
+          time:row.time,
+        };
+        final.push(temp);
+      }
+      res.end(JSON.stringify(final));
+    }).catch( (err) => {
+      res.end(JSON.stringify(err))
+    });
 })
 
 app.post('/notes', function (req, res) {
@@ -45,9 +63,9 @@ app.post('/notes', function (req, res) {
     time:req.body.time,
   };
 
-  var query = "INSERT INTO prephubwifi.all_reports (created_at, name, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7)";
+  var query = "INSERT INTO prephubwifi.all_reports (time, newName, needHelp, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
-  var values = [response.time, response.newName, response.notes, 0, 'confirmed', 'en', {}];
+  var values = [response.time, response.newName, response.needHelp, response.notes, 0, 'confirmed', 'en', {}];
   client.query(query, values)
     .then(function() {
       console.log("Done inserting");
