@@ -1,0 +1,30 @@
+version: '2' 
+
+services:
+        db: 
+                image: slr/slr-schema
+                restart: always
+                environment: 
+                        POSTGRES_USER: florida
+                        POSTGRES_PASS: florida
+                        POSTGRES_DBNAME: florida
+                        PGPASSWORD: florida
+
+        slr-server: 
+                depends_on:
+                        - db 
+                image: slr/slr-server
+                ports: 
+                        - "8443:5001"
+                restart: always
+                environment:
+                        PG_HOST: db
+                        PG_PASSWORD: florida
+
+        flux-land: 
+                depends_on: 
+                  - slr-server
+                image: slr/flux-land
+                restart: always
+                ports:
+                  - "9000:9000"
