@@ -1,4 +1,4 @@
-#Docker container for Hermes
+#Docker container for prephubwifi/server
 
 FROM node:boron
 

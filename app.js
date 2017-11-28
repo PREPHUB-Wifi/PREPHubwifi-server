@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -6,7 +8,7 @@ var cors = require('cors');
 const {Client} = require('pg');
 var client = new Client({
   user: 'postgres',
-  host: 'localhost',
+  host: process.env.DB_HOST || 'localhost',
   database: 'prephubwifi',
   password: 'postgres',
   port: 5432,
@@ -15,8 +17,9 @@ var client = new Client({
 client.connect((err) => {
   if (err) {
     console.error("Could not connect to database")
+    console.error("On host: " + process.env.DB_HOST)
   } else {
-    console.log("connected")
+    console.log("Connected to db!")
   }
 });
 

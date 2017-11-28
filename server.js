@@ -34,6 +34,9 @@ app.get('/notes', function (req, res) {
       ) t`; 
   client.query(query)
     .then( (result) => {
+      if (!result) {
+        res.status(204).send("no data");
+      }
       console.log("results: ");
       console.log(JSON.stringify(result.rows[0].array_to_json));
       let data = result.rows[0].array_to_json;
@@ -55,7 +58,6 @@ app.get('/notes', function (req, res) {
 
 app.post('/notes', function (req, res) {
   // Prepare output in JSON format
-  console.log(req.body);
   response = {
     newName:req.body.newName,
     needHelp:req.body.needHelp,
@@ -74,6 +76,7 @@ app.post('/notes', function (req, res) {
       console.log("Error inserting")
     });
   push_to_radio(response);
+  console.log("POST REQUEST:");
   console.log(response);
   res.end(JSON.stringify(response));
 })

@@ -2,29 +2,29 @@ version: '2'
 
 services:
         db: 
-                image: slr/slr-schema
+                image: prephubwifi/db
                 restart: always
-                environment: 
-                        POSTGRES_USER: florida
-                        POSTGRES_PASS: florida
-                        POSTGRES_DBNAME: florida
-                        PGPASSWORD: florida
+                environment:
+                        POSTGRES_USER: postgres
+                        POSTGRES_PASS: postgres
+                        POSTGRES_DBNAME: prephubwifi
+                        PGPASSWORD: postgres
 
-        slr-server: 
+        server:
                 depends_on:
-                        - db 
-                image: slr/slr-server
-                ports: 
-                        - "8443:5001"
+                        - db
+                image: prephubwifi/server
+                ports:
+                        - "8443:8081"
                 restart: always
                 environment:
                         PG_HOST: db
-                        PG_PASSWORD: florida
+                        PG_PASSWORD: postgres
 
-        flux-land: 
-                depends_on: 
-                  - slr-server
-                image: slr/flux-land
-                restart: always
-                ports:
-                  - "9000:9000"
+#        flux-land:
+#                depends_on:
+#                  - server
+#                image: prephubwifi/frontend
+#                restart: always
+#                ports:
+#                  - "9000:9000"
