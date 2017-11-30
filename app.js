@@ -3,7 +3,9 @@ require('dotenv').config();
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-var cors = require('cors');
+var cors = require('cors'); 
+var querystring = require('querystring');
+var http = require('http');
 
 const {Client} = require('pg');
 var client = new Client({
@@ -76,10 +78,40 @@ app.post('/notes', function (req, res) {
     .catch(function() {
       console.log("Error inserting")
     });
-
+  push_to_radio(response);
   console.log(response);
   res.end(JSON.stringify(response));
 })
+
+function push_to_radio(data){
+   console.log('wassup'); 
+   var post_data = querystring.stringify(data);
+
+  // An object of options to indicate where to post to
+  var post_options = {
+      host: 'localhost',
+      port: '80',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+      }
+  };
+
+  // Set up the request
+  var post_req = http.request(post_options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          console.log('Response: ' + chunk);
+      });
+  });
+
+  var buffer = new Buffer(data.toString(), "utf-8")
+  // post the data
+  post_req.write(buffer);
+  post_req.end(); 
+  console.log('wassup');
+
+}
 
 var server = app.listen(8081, function () {
   var host = server.address().address
