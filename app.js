@@ -6,6 +6,8 @@ var bodyParser = require('body-parser');
 var cors = require('cors'); 
 var querystring = require('querystring');
 var http = require('http');
+var request=require('request');
+
 
 const {Client} = require('pg');
 var client = new Client({
@@ -84,32 +86,37 @@ app.post('/notes', function (req, res) {
 })
 
 function push_to_radio(data){
-   console.log('wassup'); 
-   var post_data = querystring.stringify(data);
+  const postData = querystring.stringify(data);
 
-  // An object of options to indicate where to post to
-  var post_options = {
-      host: 'localhost',
-      port: '80',
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-      }
+  const options = {
+    hostname: 'localhost',
+    port: 8888,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': Buffer.byteLength(postData)
+    }
   };
 
-  // Set up the request
-  var post_req = http.request(post_options, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          console.log('Response: ' + chunk);
-      });
+  const req = http.request(options, (res) => {
+    console.log(`STATUS: ${res.statusCode}`);
+    console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+    res.setEncoding('utf8');
+    res.on('data', (chunk) => {
+      console.log(`BODY: ${chunk}`);
+    });
+    res.on('end', () => {
+      console.log('No more data in response.');
+    });
   });
 
-  var buffer = new Buffer(data.toString(), "utf-8")
-  // post the data
-  post_req.write(buffer);
-  post_req.end(); 
-  console.log('wassup');
+  req.on('error', (e) => {
+    console.error(`problem with request: ${e.message}`);
+  });
+
+  // write data to request body
+  req.write(postData);
+  req.end();
 
 }
 
