@@ -37,7 +37,7 @@ app.get('/notes', function (req, res) {
   //let query = "SELECT (name, source, status, created_at) FROM prephubwifi.all_reports";
   let query = `select array_to_json(array_agg(row_to_json(t)))
       from (
-        select newName, needHelp, notes, time from prephubwifi.all_reports
+        select pckt_id,newName, needHelp, notes, time from prephubwifi.all_reports
       ) t`; 
   client.query(query)
     .then( (result) => {
@@ -46,7 +46,8 @@ app.get('/notes', function (req, res) {
       let data = result.rows[0].array_to_json;
       let final = [];
       for (let row of data) { 
-        temp = {
+        temp = { 
+          pckt_id:row.pckt_id,
           newName:row.newname,
           needHelp:row.needhelp,
           notes:row.notes,
@@ -64,15 +65,16 @@ app.post('/notes', function (req, res) {
   // Prepare output in JSON format
   console.log(req.body);
   response = {
+    pckt_id:req.body.pckt_id,
     newName:req.body.newName,
     needHelp:req.body.needHelp,
     notes:req.body.notes,
     time:req.body.time,
   };
 
-  var query = "INSERT INTO prephubwifi.all_reports (time, newName, needHelp, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
+  var query = "INSERT INTO prephubwifi.all_reports (time, pckt_id, newName, needHelp, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9)";
 
-  var values = [response.time, response.newName, response.needHelp, response.notes, 0, 'confirmed', 'en', {}];
+  var values = [response.time, response.pckt_id, response.newName, response.needHelp, response.notes, 0, 'confirmed', 'en', {}];
   client.query(query, values)
     .then(function() {
       console.log("Done inserting");
