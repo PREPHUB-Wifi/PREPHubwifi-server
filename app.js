@@ -123,7 +123,7 @@ function push_to_radio(data){
 
 }
 
-var server = app.listen(process.env.PORT, function () {
+var server = app.listen(8443, function () {
   var host = server.address().address
   var port = server.address().port
 
