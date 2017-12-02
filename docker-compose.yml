@@ -15,7 +15,7 @@ services:
                         - db
                 image: prephubwifi/server
                 ports:
-                        - "8443:8081"
+                        - "8443:8443"
                 restart: always
                 environment:
                         PG_HOST: db
