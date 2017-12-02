@@ -22,6 +22,7 @@ client.connect((err) => {
   if (err) {
     console.error("Could not connect to database")
     console.error("On host: " + process.env.DB_HOST)
+    throw new Error("Could not establish connection to db");
   } else {
     console.log("Connected to db!")
   }
@@ -120,7 +121,7 @@ function push_to_radio(data){
 
 }
 
-var server = app.listen(8081, function () {
+var server = app.listen(process.env.PORT, function () {
   var host = server.address().address
   var port = server.address().port
 
