@@ -32,22 +32,6 @@ client.connect((err) => {
 app.use(bodyParser());
 app.use(cors({origin: "*"})); 
 
-
-//listen for new info being put into database 
-//if new item is not from current prephub: 
-      //compare newly added item to the one above it 
-      //if packets are not 1 apart: 
-          //sync pkts
-
-//sync packets: 
-   //get all of the records 
-   //if new packet has 'lower' hash than older one
-       //starting from end, traverse up the list until we can insert it in the appropriate spot 
-   //if new packet has 'greater' hash than older one 
-       //determine how many packets we are missing 
-       //reach out to prephub that sent new information and ask them to send all missing packets
-
-
 app.get('/notes', function (req, res) {
   // send all of the notes
   console.log("GET request to /notes");
@@ -80,6 +64,8 @@ app.get('/notes', function (req, res) {
     });
 })
 
+
+
 app.post('/notes', function (req, res) {
   // Prepare output in JSON format 
   var hash_val = md5(); //Not accurate because the hash won't include the new information 
@@ -107,6 +93,20 @@ app.post('/notes', function (req, res) {
   push_to_radio(response);
   console.log(response);
   res.end(JSON.stringify(response));
+})
+
+app.delete('/notes/:pckt_id', function (req, res) {
+  // Prepare output in JSON format
+  console.log(req.params);
+
+  var query = "DELETE FROM prephubwifi.all_reports WHERE pckt_id=" + req.params.pckt_id;
+  client.query(query)
+    .then(function() {
+      console.log("Successfully Deleted");
+    })
+    .catch(function() {
+      console.log("Couldn't delete item")
+    });
 })
 
 function push_to_radio(data){
