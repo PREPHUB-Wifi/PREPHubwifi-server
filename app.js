@@ -90,8 +90,42 @@ app.post('/notes', function (req, res) {
     .catch(function() {
       console.log("Error inserting")
     });
-  push_to_radio(response);
+  push_to_radio(response,'POST');
   console.log(response);
+  res.end(JSON.stringify(response));
+})
+
+app.put('/notes', function (req, res) {
+  // Prepare output in JSON format  
+  console.log(req.body);
+  var hash_val = md5();
+  // var hash_val = md5(); //Not accurate because the hash won't include the new information 
+  // console.log("" +  hash_val);
+  response = { 
+    hash: hash_val.substring(0,4),
+    pckt_id:req.body.pckt_id, 
+    no_sync: 0, //0 means that receiver should initiate a sync process
+    newName:req.body.newName,
+    needHelp:req.body.needHelp,
+    notes:req.body.notes,
+    time:req.body.time,
+  };
+
+  var query = "UPDATE prephubwifi.all_reports SET newName='"+ req.body.newName+ "',needHelp='" + req.body.needHelp + "',notes='" + req.body.notes + "',time=" + req.body.time +  " WHERE pckt_id=" + req.body.pckt_id;
+  //var query = "INSERT INTO prephubwifi.all_reports (time, hash, pckt_id, no_sync, newName, needHelp, notes, source, status, lang, tags) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10,$11)";
+
+  console.log("UPDATE query!");
+  console.log(query);
+  // var values = [response.time, response.hash, response.pckt_id, response.no_sync, response.newName, response.needHelp, response.notes, 0, 'confirmed', 'en', {}];
+  client.query(query)
+    .then(function() {
+      console.log("Done updating");
+    })
+    .catch(function() {
+      console.log("Error updating")
+    });
+ // push_to_radio(response,'PUT');
+  // console.log(response);
   res.end(JSON.stringify(response));
 })
 
@@ -107,15 +141,17 @@ app.delete('/notes/:pckt_id', function (req, res) {
     .catch(function() {
       console.log("Couldn't delete item")
     });
+   // push_to_radio(response,'DELETE');
 })
 
-function push_to_radio(data){
+
+function push_to_radio(data, operation){
   const postData = querystring.stringify(data);
 
   const options = {
     hostname: 'localhost',
-    port: 8888,
-    method: 'POST',
+    port: 8000,
+    method: operation,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(postData)
